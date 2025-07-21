@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+*.egg
+
+# Environment
+.env
+venv/
+env/
+ENV/
+*.env
+*.venv
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+*.log
+
+# VSCode or IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Migrations (optional, only if you don’t want to track them)
+# **/migrations/
+# !**/migrations/__init__.py
+
+# Coverage reports
+htmlcov/
+coverage.xml
+*.cover
+
+# Node modules (if using npm)
+node_modules/
+
+# Pytest
+.pytest_cache/
+
+# Build
+build/
+dist/
+*.egg-info/
