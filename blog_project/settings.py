@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'blog',
+    'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -127,6 +129,18 @@ AUTH_USER_MODEL = 'blog.User'
 
 LOGIN_URL = '/accounts/login/'  # or your actual login path
 LOGIN_REDIRECT_URL = 'post_list'  # or '/' or any valid URL/view name
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+}
+
+APPEND_SLASH=False
+
 
 
 

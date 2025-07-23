@@ -102,3 +102,96 @@ class CustomLogoutView(LogoutView):
     def get_success_url(self):
         return reverse_lazy('post_list')
 
+
+# Django Restful Framework
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from .models import Post,User
+from .serializers import PostSerializer,UserSerializer
+from django.shortcuts import get_object_or_404
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import get_user_model, authenticate
+
+
+class PostDetailAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_object(self, slug):
+        return get_object_or_404(Post, slug=slug)
+
+    def get(self, request, slug, format=None):
+        post = self.get_object(slug)
+        serializer = PostSerializer(post)
+        return Response(serializer.data)
+
+    def put(self, request, slug, format=None):
+        post = self.get_object(slug)
+        if post.author != request.user:
+            return Response({'detail': 'Not authorized to update this post.'}, status=status.HTTP_403_FORBIDDEN)
+        serializer = PostSerializer(post, data=request.data)
+        if serializer.is_valid():
+            serializer.save(author=request.user)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, slug, format=None):
+        post = self.get_object(slug)
+        if post.author != request.user:
+            return Response({'detail': 'Not authorized to delete this post.'}, status=status.HTTP_403_FORBIDDEN)
+        post.delete()
+        return Response({'detail': 'Post deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+    
+
+class PostListAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, format=None):
+        posts = Post.objects.all()
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(author=request.user)  # attach logged-in user
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class RegisterAPIView(APIView):
+    def get(self, request, format=None):
+        user = User.objects.all()
+        serializer = UserSerializer(user, many=True)
+        return Response(serializer.data)
+
+    def post(self,request,format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                "message": "User registered successfully",
+                "user": UserSerializer(user).data
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+User = get_user_model()
+
+class LoginAPIView(APIView):
+    def post(self, request, format=None):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({
+                'message': 'Login successful',
+                'token': token.key,
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email
+                }
+            }, status=status.HTTP_200_OK)
+        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+

@@ -5,6 +5,7 @@ from .views import (
     PostListView, PostDetailView,
     PostCreateView, PostUpdateView,
     PostDeleteView, MyPostsView,CustomLoginView,CustomLogoutView,
+    PostDetailAPIView, PostListAPIView, RegisterAPIView,LoginAPIView
 )
 
 urlpatterns = [
@@ -17,4 +18,9 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(template_name='blog/login.html'), name='login'),
     path('logout/', CustomLogoutView.as_view(template_name='blog/logout.html'), name='logout'),
     path('register/', register, name='register'),
+    path('api/posts/', PostListAPIView.as_view(), name='api_post_list_create'),
+    path('api/posts/<slug:slug>/', PostDetailAPIView.as_view(), name='api_post_detail'),
+    path('api/register/', RegisterAPIView.as_view(), name='api_register'),
+    path('api/login/', LoginAPIView.as_view(), name='api_login'),
+
 ]
